@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CronController;
+use App\Http\Controllers\Api\DraftController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\LocationController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,14 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/locations/refresh', [LocationController::class, 'refresh'])->middleware('throttle:google-refresh');
     Route::get('/locations/{location}', [LocationController::class, 'show'])->whereNumber('location');
     Route::patch('/locations/{location}', [LocationController::class, 'update'])->whereNumber('location');
+
+    Route::get('/queue', [DraftController::class, 'queue']);
+    Route::whereNumber('draft')->prefix('drafts/{draft}')->group(function () {
+        Route::patch('/', [DraftController::class, 'update']);
+        Route::post('/approve', [DraftController::class, 'approve'])->name('drafts.approve')->middleware('throttle:post-reply');
+        Route::post('/dismiss', [DraftController::class, 'dismiss']);
+        Route::post('/regenerate', [DraftController::class, 'regenerate'])->middleware('throttle:regenerate');
+    });
 
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/health', [AdminController::class, 'health']);

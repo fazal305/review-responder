@@ -48,6 +48,18 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('google-refresh', fn (Request $request) => Limit::perMinute(3)
             ->by('google-refresh:'.$request->user()->id)->response($tooMany));
 
+        RateLimiter::for('post-reply', fn (Request $request) => [
+            Limit::perMinute(20)->by('post-reply:'.$request->user()->id)->response($tooMany),
+            Limit::perMinute(40)->by('post-reply-ip:'.$request->ip())->response($tooMany),
+        ]);
+
+        // Each regeneration is a paid LLM call.
+        RateLimiter::for('regenerate', fn (Request $request) => [
+            Limit::perMinute(6)->by('regenerate:'.$request->user()->id)->response($tooMany),
+            Limit::perDay(100)->by('regenerate-day:'.$request->user()->id)->response($tooMany),
+            Limit::perMinute(12)->by('regenerate-ip:'.$request->ip())->response($tooMany),
+        ]);
+
         // Queue-side spacing of sync jobs per owner; RealGoogleBusiness also caps calls per Google account.
         RateLimiter::for('google-sync', fn (object $job) => Limit::perMinute(20)->by('google-sync:'.$job->location->user_id));
     }

@@ -14,9 +14,10 @@ This is an early build. Working so far:
 - Locations page: refresh locations from Google, switch monitoring on or off, and set each location's timezone
 - Nightly review sync: each monitored location is checked at about 2am in its own timezone, new reviews are stored, and a reply draft with sentiment and themes is generated for each one
 - Demo accounts get three sample bakery locations with sample reviews and drafts straight away, labelled "Sample data"
+- Review queue: pending drafts grouped by location, inline editing, "Approve & Post" (posts the reply to Google straight away), dismiss, and regenerate with a tone (more apologetic, more casual, more formal, shorter). Failed drafts can be retried or written by hand
 - Account deletion and an admin health page
 
-The review queue (edit, approve and post, dismiss, regenerate) and the morning summary email are being built next.
+The morning summary email is being built next.
 
 ## Stack
 
@@ -72,6 +73,14 @@ npm run dev                 # http://localhost:5472
 ```bash
 cd api && php artisan test && ./vendor/bin/pint --test
 cd web && npm run lint && npm run build
+```
+
+Browser tests (Playwright) start their own API on port 8472, using a throwaway SQLite database in the system temp folder, and the web app on port 5482:
+
+```bash
+cd web
+npx playwright install chromium   # first time only
+npm run test:e2e                  # set PHP_BINARY if php is not on your PATH
 ```
 
 ## Environment variables
