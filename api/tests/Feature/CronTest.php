@@ -11,6 +11,14 @@ class CronTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function tearDown(): void
+    {
+        // The endpoint calls set_time_limit(150), which would otherwise cap the rest of the test run.
+        set_time_limit(0);
+
+        parent::tearDown();
+    }
+
     public function test_cron_endpoint_rejects_missing_or_wrong_secret(): void
     {
         config(['services.cron.secret' => '']);

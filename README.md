@@ -36,7 +36,7 @@ All screenshots show a demo account with labelled sample data.
 
 | Part | Technology |
 |---|---|
-| `api/` | Laravel 13 (PHP 8.4), Laravel Sanctum bearer tokens, MySQL 8, database queue and cache |
+| `api/` | Laravel 13 (PHP 8.4), Laravel Sanctum bearer tokens, MySQL 8 or PostgreSQL, database queue and cache |
 | `web/` | React 19, Vite, Tailwind CSS 4, React Router, axios — plain JavaScript/JSX |
 
 ## Local setup
@@ -102,7 +102,7 @@ npm run test:e2e                  # set PHP_BINARY if php is not on your PATH
 
 | Variable | Purpose |
 |---|---|
-| `DB_*` | MySQL connection |
+| `DB_*` | Database connection. `DB_CONNECTION` is `mysql` or `pgsql`; for PostgreSQL also `DB_SEARCH_PATH` (the schema, default `public`) and `DB_SSLMODE` (`require` for hosted databases) |
 | `FRONTEND_URL` | Origin(s) of the web app, comma-separated. Used for CORS; the first one receives the Google sign-in redirect |
 | `SANCTUM_EXPIRATION` | API token lifetime in minutes (default 7 days) |
 | `GOOGLE_DRIVER` | `demo` (labelled sample locations and reviews) or `real` (Google Business Profile APIs) |
@@ -141,6 +141,12 @@ On hosts without cron, the `Review sync` GitHub Actions workflow (`.github/workf
 `summaries:send` emails each owner who has the daily summary switched on, when it is their chosen hour in their timezone, at most once per local day, and only if drafts were created since their last summary. Each email is sent from the queue and recorded in the API usage log. The cron endpoint runs it too, after `reviews:sync`.
 
 `demo:prune` deletes demo accounts that are more than 24 hours old, together with their locations, reviews, drafts and sign-in tokens. Accounts created with Google are never touched. The cron endpoint runs it after `summaries:send`.
+
+## Deploying the API
+
+`api/Dockerfile` builds a production image (FrankenPHP, PHP 8.4, OPcache, `pdo_pgsql` and `pdo_mysql`) that listens on `$PORT` (default 8080). It sets `APP_ENV=production`, `APP_DEBUG=false` and logs to stderr; it contains no secrets, so set `APP_KEY`, the `DB_*` variables and the other variables above in the host's environment. On every start, `api/docker/start.sh` caches config and routes, runs `php artisan migrate --force`, switches on row level security for every table when the database is PostgreSQL (`php artisan db:enable-rls`), starts a queue worker and then the web server. Review sync, summaries and demo pruning are triggered by the `Review sync` workflow (see Scheduling).
+
+For PostgreSQL in a dedicated schema of a shared database (for example a Supabase project), give the app its own login role that owns the schema, with no access granted to other roles, and set `DB_SEARCH_PATH` to that schema. The app role owns its tables, so row level security does not restrict it, while every other role is denied.
 
 ## Deploying the web app
 
