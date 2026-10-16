@@ -3,10 +3,13 @@
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureTermsAccepted;
 use App\Http\Middleware\SecurityHeaders;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -25,4 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+        // A missing record and another owner's record answer identically, so ids can't be probed and model names don't leak.
+        $exceptions->render(fn (HttpExceptionInterface $e, Request $request) => $e->getStatusCode() === 404
+            && $request->is('api/*')
+            && ($e->getPrevious() instanceof ModelNotFoundException || $e->getPrevious() instanceof AuthorizationException)
+                ? response()->json(['message' => 'Not Found.'], 404)
+                : null);
     })->create();

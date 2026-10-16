@@ -1,2 +1,3 @@
-// Expected production origin (not yet verified). Replace here, in index.html, public/robots.txt and public/sitemap.xml when deploying elsewhere.
+// Expected production origin (not yet verified). Also used for the canonical and social tags in index.html (at build time).
+// When deploying elsewhere, replace it here and in public/robots.txt and public/sitemap.xml.
 export const SITE_URL = 'https://review-responder.vercel.app'

@@ -4,6 +4,8 @@ Review Responder helps a local business keep up with its Google reviews. It fetc
 
 **Live demo:** not deployed yet.
 
+![The morning queue: reply drafts for sample bakery locations, each beside the review it answers](docs/screenshots/queue-desktop.png)
+
 ## Status
 
 This is an early build. Working so far:
@@ -20,6 +22,15 @@ This is an early build. Working so far:
 - Admin page: API usage for the last 7 days by service and action (calls, failures, average time), recent failures, failed and queued jobs, and account, location and draft totals. Aggregates only, no personal data
 - Privacy Policy, Terms of Service and FAQ pages. New Google accounts confirm once that they are 18 or older, authorized to manage the business profile, and accept the Terms; the demo asks for the same confirmation before it starts
 - Account deletion
+- Demo accounts, with all their sample data, are deleted 24 hours after they are created
+
+## Screenshots
+
+All screenshots show a demo account with labelled sample data.
+
+| Locations | Settings | Queue on a phone |
+|---|---|---|
+| ![Locations with monitoring switches and timezones](docs/screenshots/locations.png) | ![Settings with reply guidelines](docs/screenshots/settings.png) | ![The queue at 375px wide](docs/screenshots/queue-mobile.png) |
 
 ## Stack
 
@@ -121,7 +132,7 @@ php artisan schedule:work      # or a cron entry: * * * * * php artisan schedule
 php artisan queue:work
 ```
 
-`reviews:sync` and `summaries:send` both run hourly.
+`reviews:sync`, `summaries:send` and `demo:prune` all run hourly.
 
 `reviews:sync` Each run queues only monitored locations where the local time is between 02:00 and 02:59 and that have not been synced that local day. A sync fetches reviews from the last 24 hours, or back to the start of the last synced day if nights were missed (at most 30 days), skips reviews already answered on Google, and queues one draft per new review. For a manual run: `php artisan reviews:sync --force` (all monitored locations) or `--location=ID`.
 
@@ -129,9 +140,13 @@ On hosts without cron, the `Review sync` GitHub Actions workflow (`.github/workf
 
 `summaries:send` emails each owner who has the daily summary switched on, when it is their chosen hour in their timezone, at most once per local day, and only if drafts were created since their last summary. Each email is sent from the queue and recorded in the API usage log. The cron endpoint runs it too, after `reviews:sync`.
 
+`demo:prune` deletes demo accounts that are more than 24 hours old, together with their locations, reviews, drafts and sign-in tokens. Accounts created with Google are never touched. The cron endpoint runs it after `summaries:send`.
+
 ## Deploying the web app
 
-The expected production address, `https://review-responder.vercel.app`, is not verified yet. If the site is deployed elsewhere, replace it in `web/index.html` (canonical and social tags), `web/src/lib/site.js`, `web/public/robots.txt` and `web/public/sitemap.xml`. The social preview image `web/public/og-image.png` is referenced but not created yet; it will be a real screenshot of the app.
+The expected production address, `https://review-responder.vercel.app`, is not verified yet. If the site is deployed elsewhere, replace it in `web/src/lib/site.js` (the build writes it into the canonical and social tags in `index.html`), `web/public/robots.txt` and `web/public/sitemap.xml`. The social preview image `web/public/og-image.png` is a screenshot of the queue in a demo account.
+
+`web/vercel.json` sets a Content-Security-Policy with `connect-src 'self'`. When the API is on a different origin, add that origin to `connect-src` (for example `connect-src 'self' https://api.example.com`), or the app cannot reach the API.
 
 ## Security
 

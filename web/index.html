@@ -7,19 +7,22 @@
     <meta name="description" content="Review Responder fetches new Google reviews for your business, drafts a reply to each one overnight, and lets you edit, approve and post them in the morning." />
     <meta name="theme-color" content="#24365c" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <!-- https://review-responder.vercel.app is the expected production origin (unverified). Replace it here and in src/lib/site.js, public/robots.txt and public/sitemap.xml at deploy. -->
-    <link rel="canonical" href="https://review-responder.vercel.app/" />
+    <!-- The site origin in these tags is filled in at build time from src/lib/site.js. -->
+    <link rel="canonical" href="%SITE_URL%/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Review Responder" />
     <meta property="og:title" content="Review Responder — reply drafts for your Google reviews" />
     <meta property="og:description" content="New Google reviews fetched overnight, a reply drafted for each one, and a morning queue where you edit, approve and post." />
-    <meta property="og:url" content="https://review-responder.vercel.app/" />
-    <meta property="og:image" content="https://review-responder.vercel.app/og-image.png" />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="The Review Responder morning queue with reply drafts grouped by location" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Review Responder — reply drafts for your Google reviews" />
     <meta name="twitter:description" content="New Google reviews fetched overnight, a reply drafted for each one, and a morning queue where you edit, approve and post." />
-    <meta name="twitter:image" content="https://review-responder.vercel.app/og-image.png" />
+    <meta name="twitter:image" content="%SITE_URL%/og-image.png" />
   </head>
   <body>
     <div id="root"></div>

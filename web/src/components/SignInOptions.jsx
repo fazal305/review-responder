@@ -110,7 +110,7 @@ export function SignInOptions() {
           Try the demo
         </Button>
       )}
-      {demoEnabled && <p className="text-xs text-muted">The demo creates a private, throwaway account. It is never connected to a real Google Business Profile.</p>}
+      {demoEnabled && <p className="text-xs text-muted">The demo creates a private, throwaway account that is deleted after 24 hours. It is never connected to a real Google Business Profile.</p>}
     </div>
   )
 }

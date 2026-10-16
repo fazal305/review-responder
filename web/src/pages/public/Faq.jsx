@@ -8,7 +8,8 @@ const QUESTIONS = [
     a: (
       <p>
         No. &ldquo;Try the demo&rdquo; creates a private, throwaway account with fictional sample bakeries and reviews, labelled
-        &ldquo;Sample data&rdquo;. Approving a demo reply only marks it as posted; nothing is sent to Google.
+        &ldquo;Sample data&rdquo;. Approving a demo reply only marks it as posted; nothing is sent to Google. Demo accounts are deleted
+        after 24 hours.
       </p>
     ),
   },

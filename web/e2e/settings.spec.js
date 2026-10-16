@@ -67,6 +67,9 @@ test.describe('mobile', () => {
   test.use({ viewport: { width: 375, height: 812 } })
 
   for (const [path, heading] of [
+    ['/', 'Your Google reviews, answered by breakfast.'],
+    ['/signin', 'Sign in'],
+    ['/auth/callback#error=denied', 'Sign in'],
     ['/privacy', 'Privacy Policy'],
     ['/terms', 'Terms of Service'],
     ['/faq', 'Frequently asked questions'],
@@ -83,6 +86,24 @@ test.describe('mobile', () => {
     await demoSignIn(page, request)
     await page.goto('/app/settings')
     await expect(page.getByLabel('Sign-off')).toBeVisible()
+    await expectNoHorizontalOverflow(page)
+  })
+
+  test('app 404, 403 and terms screens fit a 375px screen', async ({ page, request }) => {
+    await demoSignIn(page, request)
+    await page.goto('/app/no-such-page')
+    await expect(page.getByRole('heading', { name: "This page doesn't exist" })).toBeVisible()
+    await expectNoHorizontalOverflow(page)
+
+    await page.goto('/app/admin')
+    await expect(page.getByRole('heading', { name: "You don't have access to this page" })).toBeVisible()
+    await expectNoHorizontalOverflow(page)
+  })
+
+  test('first-sign-in confirmation fits a 375px screen', async ({ page }) => {
+    await realSignIn(page, { acceptedTerms: false })
+    await page.goto('/app')
+    await expect(page.getByRole('heading', { name: 'Before you start' })).toBeVisible()
     await expectNoHorizontalOverflow(page)
   })
 

@@ -7,3 +7,5 @@ Schedule::command('reviews:sync')->hourly()->withoutOverlapping();
 
 // Each run emails only owners whose chosen hour it is locally, so hourly covers every timezone.
 Schedule::command('summaries:send')->hourly()->withoutOverlapping();
+
+Schedule::command('demo:prune')->hourly()->withoutOverlapping();

@@ -73,7 +73,8 @@ export default function Privacy() {
 
       <h2>How long we keep it</h2>
       <p>
-        We keep your data while your account exists. Demo accounts hold only fictional sample data and may be removed at any time.
+        We keep your data while your account exists. Demo accounts hold only fictional sample data and are deleted, with
+        everything in them, 24 hours after they are created.
       </p>
 
       <h2>Deleting your data</h2>

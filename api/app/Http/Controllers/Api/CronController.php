@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Lets an external scheduler run the hourly review sync and morning summaries on hosts without cron or that
+ * Lets an external scheduler run the hourly review sync, morning summaries and demo cleanup on hosts without cron or that
  * sleep when idle. Calls the commands directly rather than schedule:run, because hourly scheduled tasks only fire at
  * minute 0 and external triggers arrive late. Disabled unless CRON_SECRET is set.
  */
@@ -33,11 +33,13 @@ class CronController extends Controller
             $sync = trim(Artisan::output());
             Artisan::call('summaries:send');
             $summaries = trim(Artisan::output());
+            Artisan::call('demo:prune');
+            $demo = trim(Artisan::output());
             Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-time' => 120]);
         } finally {
             $lock->release();
         }
 
-        return response()->json(['message' => 'OK', 'sync' => $sync, 'summaries' => $summaries]);
+        return response()->json(['message' => 'OK', 'sync' => $sync, 'summaries' => $summaries, 'demo' => $demo]);
     }
 }

@@ -44,7 +44,8 @@ export default function Terms() {
       <h2>The demo</h2>
       <p>
         Demo accounts use fictional sample businesses, reviewers and reviews. Any resemblance to real people or businesses is
-        coincidental. Nothing in a demo account is connected to Google or posted anywhere, and demo accounts may be removed at any time.
+        coincidental. Nothing in a demo account is connected to Google or posted anywhere, and demo accounts are deleted 24 hours
+        after they are created.
       </p>
 
       <h2>Availability and changes</h2>
