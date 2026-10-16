@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CronController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\LocationController;
 use Illuminate\Support\Facades\Route;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/config', [AuthController::class, 'config'])->middleware('throttle:api');
 
 Route::post('/auth/demo', [AuthController::class, 'demo'])->middleware('throttle:demo');
+
+Route::post('/cron/run', CronController::class)->middleware('throttle:auth');
 
 Route::middleware('throttle:auth')->group(function () {
     Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect']);
@@ -21,7 +24,10 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::delete('/me', [AuthController::class, 'destroy']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
+    Route::get('/locations', [LocationController::class, 'index']);
+    Route::post('/locations/refresh', [LocationController::class, 'refresh'])->middleware('throttle:google-refresh');
     Route::get('/locations/{location}', [LocationController::class, 'show'])->whereNumber('location');
+    Route::patch('/locations/{location}', [LocationController::class, 'update'])->whereNumber('location');
 
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/health', [AdminController::class, 'health']);

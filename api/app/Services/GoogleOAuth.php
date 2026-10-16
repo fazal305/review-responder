@@ -82,6 +82,23 @@ class GoogleOAuth
         ];
     }
 
+    /** @return array{access_token: string, expires_in: int} */
+    public function refresh(string $refreshToken, ?int $userId = null): array
+    {
+        $res = $this->call('oauth.refresh', fn () => Http::asForm()->timeout(15)->post(self::TOKEN_URL, [
+            'client_id' => config('services.google.client_id'),
+            'client_secret' => config('services.google.client_secret'),
+            'refresh_token' => $refreshToken,
+            'grant_type' => 'refresh_token',
+        ]), $userId);
+
+        if (! is_string($res['access_token'] ?? null)) {
+            throw new RuntimeException('Google refresh response had no access token.');
+        }
+
+        return ['access_token' => $res['access_token'], 'expires_in' => (int) ($res['expires_in'] ?? 3600)];
+    }
+
     /** Best effort: a failed revoke must not block account deletion. */
     public function revoke(string $token): void
     {
@@ -98,7 +115,7 @@ class GoogleOAuth
     }
 
     /** @param  callable(): Response  $request */
-    private function call(string $action, callable $request): array
+    private function call(string $action, callable $request, ?int $userId = null): array
     {
         $started = hrtime(true);
         $ok = false;
@@ -112,6 +129,7 @@ class GoogleOAuth
             return $response->json() ?? [];
         } finally {
             ApiUsageLog::create([
+                'user_id' => $userId,
                 'service' => 'google',
                 'action' => $action,
                 'ok' => $ok,

@@ -56,6 +56,25 @@ export function Alert({ tone = 'info', title, children, className = '' }) {
   )
 }
 
+/** Polite live region that shows `message` briefly. `onDone` must be stable (e.g. a state setter wrapper in useCallback). */
+export function Toast({ message, onDone }) {
+  useEffect(() => {
+    if (!message) return
+    const timer = setTimeout(onDone, 4000)
+    return () => clearTimeout(timer)
+  }, [message, onDone])
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 flex justify-center px-4 lg:bottom-6"
+    >
+      {message && <p className="rounded-lg bg-ink px-4 py-2.5 text-sm font-medium text-paper shadow-lg">{message}</p>}
+    </div>
+  )
+}
+
 export function Skeleton({ className = '' }) {
   return <div aria-hidden="true" className={`skeleton ${className}`} />
 }

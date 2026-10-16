@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 #[Fillable(['google_location_name', 'title', 'address_line', 'timezone', 'monitoring', 'last_synced_on'])]
 class Location extends Model
@@ -31,5 +32,10 @@ class Location extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function drafts(): HasManyThrough
+    {
+        return $this->hasManyThrough(Draft::class, Review::class);
     }
 }

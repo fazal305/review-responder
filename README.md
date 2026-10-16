@@ -11,9 +11,12 @@ This is an early build. Working so far:
 - Sign-in with Google (OAuth 2.0 with the Business Profile scope), or a "Try the demo" sign-in that creates a private, throwaway account
 - Database schema for users, Google accounts, locations, reply guidelines, reviews, drafts and API usage logs
 - Per-user access control on locations, reviews and drafts, plus an admin role
-- Web app shell with the queue, locations and settings pages (empty until review syncing is built), account deletion, and an admin health page
+- Locations page: refresh locations from Google, switch monitoring on or off, and set each location's timezone
+- Nightly review sync: each monitored location is checked at about 2am in its own timezone, new reviews are stored, and a reply draft with sentiment and themes is generated for each one
+- Demo accounts get three sample bakery locations with sample reviews and drafts straight away, labelled "Sample data"
+- Account deletion and an admin health page
 
-Review syncing, reply drafting, posting replies and the morning summary email are being built next.
+The review queue (edit, approve and post, dismiss, regenerate) and the morning summary email are being built next.
 
 ## Stack
 
@@ -83,7 +86,8 @@ cd web && npm run lint && npm run build
 | `GOOGLE_DRIVER` | `demo` (labelled sample locations and reviews) or `real` (Google Business Profile APIs) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` | Google OAuth client. Google sign-in is offered only when all three are set. The redirect URI is this API's `/api/auth/google/callback` and must be registered in the Google Cloud console |
 | `DEMO_LOGIN_ENABLED` | Show "Try the demo" (default `true`) |
-| `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | Any OpenAI-compatible chat completions endpoint for drafting replies (defaults to OpenRouter and a free model) |
+| `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | Any OpenAI-compatible chat completions endpoint for drafting replies (defaults to OpenRouter and a free model). Without a key, drafts come from fixed star-based templates and are labelled as template drafts |
+| `CRON_SECRET` | Shared secret for `POST /api/cron/run` (see below). Empty disables the endpoint |
 | `MAIL_*` | Outgoing mail for the morning summary. `MAIL_MAILER=log` writes emails to the log instead of sending them |
 
 The Business Profile scope (`business.manage`) is a restricted Google scope: until Google approves your project, only test users you add in the Google Cloud console can sign in.
@@ -93,6 +97,19 @@ The Business Profile scope (`business.manage`) is a restricted Google scope: unt
 | Variable | Purpose |
 |---|---|
 | `VITE_API_URL` | Base URL of the API, including `/api` |
+
+## Scheduling
+
+Review syncing runs on the Laravel scheduler and the database queue:
+
+```bash
+php artisan schedule:work      # or a cron entry: * * * * * php artisan schedule:run
+php artisan queue:work
+```
+
+`reviews:sync` runs hourly. Each run queues only monitored locations where the local time is between 02:00 and 02:59 and that have not been synced that local day. A sync fetches reviews from the last 24 hours, or back to the start of the last synced day if nights were missed (at most 30 days), skips reviews already answered on Google, and queues one draft per new review. For a manual run: `php artisan reviews:sync --force` (all monitored locations) or `--location=ID`.
+
+On hosts without cron, the `Review sync` GitHub Actions workflow (`.github/workflows/sync-cron.yml`) calls `POST /api/cron/run` hourly with `Authorization: Bearer $CRON_SECRET`, which runs `reviews:sync` and then works the queue until it is empty. Set the repository variable `API_URL` and secret `CRON_SECRET` to enable it.
 
 ## Security
 

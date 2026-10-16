@@ -52,6 +52,10 @@ return [
         'model' => env('LLM_MODEL', 'google/gemma-4-31b-it:free'),
     ],
 
+    'cron' => [
+        'secret' => env('CRON_SECRET'),
+    ],
+
     'frontend_url' => rtrim(explode(',', (string) env('FRONTEND_URL', 'http://localhost:5472'))[0], '/'),
 
 ];

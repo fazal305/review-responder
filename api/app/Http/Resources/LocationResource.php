@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\Google\GoogleBusiness;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,6 +17,8 @@ class LocationResource extends JsonResource
             'timezone' => $this->timezone,
             'monitoring' => $this->monitoring,
             'last_synced_on' => $this->last_synced_on?->toDateString(),
+            'pending_drafts' => $this->whenCounted('pending_drafts'),
+            'is_sample' => GoogleBusiness::usesSample($request->user()),
         ];
     }
 }

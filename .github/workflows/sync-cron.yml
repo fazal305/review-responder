@@ -1,0 +1,23 @@
+name: Review sync
+
+# Hosts without cron (or that sleep when idle) get the hourly sync from here.
+on:
+  schedule:
+    - cron: '5 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    if: vars.API_URL != ''
+    steps:
+      - name: Trigger review sync
+        env:
+          API_URL: ${{ vars.API_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 180 --retry 2 --retry-delay 30 \
+            -X POST -H "Authorization: Bearer $CRON_SECRET" -H "Accept: application/json" \
+            "$API_URL/api/cron/run"

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\GoogleOAuth;
+use App\Services\ReviewSync;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -22,7 +23,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function demo(): JsonResponse
+    public function demo(ReviewSync $sync): JsonResponse
     {
         abort_unless(config('services.demo.login_enabled'), 404, 'The demo is not available.');
 
@@ -31,6 +32,7 @@ class AuthController extends Controller
             'email' => 'demo-'.Str::uuid().'@demo.invalid',
             'is_demo' => true,
         ]);
+        $sync->seedDemo($user);
 
         return response()->json([
             'token' => $this->issueToken($user),
