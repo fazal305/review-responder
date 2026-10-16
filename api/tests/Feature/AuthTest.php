@@ -11,6 +11,11 @@ class AuthTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_health_check_reports_ok(): void
+    {
+        $this->getJson('/api/health')->assertOk()->assertExactJson(['status' => 'ok']);
+    }
+
     public function test_config_reports_available_sign_in_methods(): void
     {
         config(['services.google.client_id' => null, 'services.demo.login_enabled' => true]);

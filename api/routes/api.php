@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\SettingsController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/health', fn () => ['status' => 'ok']);
+
 Route::get('/config', [AuthController::class, 'config'])->middleware('throttle:api');
 
 Route::post('/auth/demo', [AuthController::class, 'demo'])->middleware('throttle:demo');
