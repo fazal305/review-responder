@@ -5,7 +5,7 @@ const TOKEN_KEY = 'rr_token'
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8472/api',
   headers: { Accept: 'application/json' },
-  timeout: 30000,
+  timeout: 75000,
 })
 
 export function getToken() {

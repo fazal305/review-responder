@@ -48,6 +48,9 @@ export function SignInOptions() {
     return (
       <div aria-busy="true" className="space-y-3">
         <span className="sr-only" role="status">Checking sign-in options…</span>
+        {config.slow && (
+          <Alert tone="warn">This is taking longer than usual. The server may be waking up, which can take up to a minute — we&apos;re still trying.</Alert>
+        )}
         <Skeleton className="h-11" />
         <Skeleton className="h-11" />
       </div>
