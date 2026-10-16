@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /app
 Disallow: /auth/
 
-Sitemap: https://review-responder.vercel.app/sitemap.xml
+Sitemap: https://review-responder-rho.vercel.app/sitemap.xml

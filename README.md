@@ -2,7 +2,7 @@
 
 Review Responder helps a local business keep up with its Google reviews. It fetches new reviews for the Google Business Profile locations you choose to monitor, drafts a reply to each one overnight, and leaves the drafts in a morning queue where you edit, approve and post them. Nothing is posted until you approve it.
 
-**Live demo:** not deployed yet.
+**Live demo:** https://review-responder-rho.vercel.app (choose "Try the demo"; it uses labelled sample data). The API runs on Render's free tier, which sleeps when idle, so the first request after a quiet spell can take about a minute while it wakes up; the app shows a notice while it waits.
 
 ![The morning queue: reply drafts for sample bakery locations, each beside the review it answers](docs/screenshots/queue-desktop.png)
 
@@ -146,13 +146,15 @@ On hosts without cron, the `Review sync` GitHub Actions workflow (`.github/workf
 
 `api/Dockerfile` builds a production image (FrankenPHP, PHP 8.4, OPcache, `pdo_pgsql` and `pdo_mysql`) that listens on `$PORT` (default 8080). It sets `APP_ENV=production`, `APP_DEBUG=false` and logs to stderr; it contains no secrets, so set `APP_KEY`, the `DB_*` variables and the other variables above in the host's environment. On every start, `api/docker/start.sh` caches config and routes, runs `php artisan migrate --force`, switches on row level security for every table when the database is PostgreSQL (`php artisan db:enable-rls`), starts a queue worker and then the web server. Review sync, summaries and demo pruning are triggered by the `Review sync` workflow (see Scheduling).
 
+The live API runs at `https://review-responder-api.onrender.com` as a Render Docker web service (root directory `api`, free plan, Singapore region, health check `GET /api/health`, deploys on every push to `main`). Its database is a dedicated `review_responder` schema in a Supabase PostgreSQL project, reached through the session pooler with `DB_SSLMODE=require`. It runs with `GOOGLE_DRIVER=demo`, `MAIL_MAILER=log` and no `LLM_API_KEY`, so the live demo uses template drafts.
+
 For PostgreSQL in a dedicated schema of a shared database (for example a Supabase project), give the app its own login role that owns the schema, with no access granted to other roles, and set `DB_SEARCH_PATH` to that schema. The app role owns its tables, so row level security does not restrict it, while every other role is denied.
 
 ## Deploying the web app
 
-The expected production address, `https://review-responder.vercel.app`, is not verified yet. If the site is deployed elsewhere, replace it in `web/src/lib/site.js` (the build writes it into the canonical and social tags in `index.html`), `web/public/robots.txt` and `web/public/sitemap.xml`. The social preview image `web/public/og-image.png` is a screenshot of the queue in a demo account.
+The web app is deployed on Vercel at `https://review-responder-rho.vercel.app` (project root `web`, Vite preset, deploys on every push to `main`) with `VITE_API_URL=https://review-responder-api.onrender.com/api`. If the site is deployed elsewhere, replace the address in `web/src/lib/site.js` (the build writes it into the canonical and social tags in `index.html`), `web/public/robots.txt` and `web/public/sitemap.xml`. The social preview image `web/public/og-image.png` is a screenshot of the queue in a demo account.
 
-`web/vercel.json` sets a Content-Security-Policy with `connect-src 'self'`. When the API is on a different origin, add that origin to `connect-src` (for example `connect-src 'self' https://api.example.com`), or the app cannot reach the API.
+`web/vercel.json` sets a Content-Security-Policy whose `connect-src` allows `'self'` and the API origin (`https://review-responder-api.onrender.com`). If the API moves, update that origin, or the app cannot reach the API.
 
 ## Security
 

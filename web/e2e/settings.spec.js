@@ -55,7 +55,7 @@ test('public pages have their own titles and footer links', async ({ page }) => 
   const footer = page.getByRole('navigation', { name: 'Legal' })
   await footer.getByRole('link', { name: 'Privacy' }).click()
   await expect(page).toHaveTitle('Privacy Policy · Review Responder')
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://review-responder.vercel.app/privacy')
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://review-responder-rho.vercel.app/privacy')
   await footer.getByRole('link', { name: 'Terms' }).click()
   await expect(page).toHaveTitle('Terms of Service · Review Responder')
   await footer.getByRole('link', { name: 'FAQ' }).click()
