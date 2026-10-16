@@ -18,6 +18,9 @@ class SecurityAuditTest extends TestCase
     /** Routes a signed-out visitor may call. */
     private const PUBLIC = ['GET api/config', 'POST api/auth/demo', 'POST api/cron/run', 'GET api/auth/google/redirect', 'GET api/auth/google/callback', 'POST api/auth/exchange'];
 
+    /** Static responses that touch no database or cache, so the host's health checks can call them freely. */
+    private const UNTHROTTLED = ['GET api/health'];
+
     /** Signed-in routes that work before the terms are accepted. */
     private const BEFORE_TERMS = ['GET api/me', 'POST api/me/accept-terms', 'DELETE api/me', 'POST api/auth/logout'];
 
@@ -48,6 +51,9 @@ class SecurityAuditTest extends TestCase
 
         foreach ($routes as $name => $route) {
             $middleware = $route->gatherMiddleware();
+            if (in_array($name, self::UNTHROTTLED, true)) {
+                continue;
+            }
             $this->assertNotEmpty(preg_grep('/^throttle:/', $middleware), "{$name} has no rate limit");
 
             if (in_array($name, self::PUBLIC, true)) {
