@@ -4,6 +4,11 @@ import { demoSignIn, expectNoHorizontalOverflow, firstDraftCard } from './helper
 test('demo sign-in shows sample drafts grouped by location', async ({ page }) => {
   await page.goto('/signin')
   await page.getByRole('button', { name: 'Try the demo' }).click()
+  await expect(page.getByText('Please confirm you are 18 or older and accept the Terms to try the demo.')).toBeVisible()
+  await expect(page).toHaveURL(/\/signin$/)
+
+  await page.getByLabel('I am 18 or older and accept the Terms of Service').check()
+  await page.getByRole('button', { name: 'Try the demo' }).click()
 
   await expect(page).toHaveURL(/\/app$/)
   await expect(page.getByRole('heading', { name: "This morning's queue" })).toBeVisible()

@@ -15,9 +15,11 @@ This is an early build. Working so far:
 - Nightly review sync: each monitored location is checked at about 2am in its own timezone, new reviews are stored, and a reply draft with sentiment and themes is generated for each one
 - Demo accounts get three sample bakery locations with sample reviews and drafts straight away, labelled "Sample data"
 - Review queue: pending drafts grouped by location, inline editing, "Approve & Post" (posts the reply to Google straight away), dismiss, and regenerate with a tone (more apologetic, more casual, more formal, shorter). Failed drafts can be retried or written by hand
-- Account deletion and an admin health page
-
-The morning summary email is being built next.
+- Settings: reply guidelines (tone, how careful replies should be, sign-off, phrases to avoid, notes for the drafter) that feed every new and regenerated draft, and morning email preferences (on/off, hour, timezone)
+- Morning summary email: once a day at the owner's chosen local hour, only when there are new drafts, listing new drafts per location and any failed drafts, with links to the queue and to notification settings. Demo accounts never receive email
+- Admin page: API usage for the last 7 days by service and action (calls, failures, average time), recent failures, failed and queued jobs, and account, location and draft totals. Aggregates only, no personal data
+- Privacy Policy, Terms of Service and FAQ pages. New Google accounts confirm once that they are 18 or older, authorized to manage the business profile, and accept the Terms; the demo asks for the same confirmation before it starts
+- Account deletion
 
 ## Stack
 
@@ -97,7 +99,10 @@ npm run test:e2e                  # set PHP_BINARY if php is not on your PATH
 | `DEMO_LOGIN_ENABLED` | Show "Try the demo" (default `true`) |
 | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | Any OpenAI-compatible chat completions endpoint for drafting replies (defaults to OpenRouter and a free model). Without a key, drafts come from fixed star-based templates and are labelled as template drafts |
 | `CRON_SECRET` | Shared secret for `POST /api/cron/run` (see below). Empty disables the endpoint |
-| `MAIL_*` | Outgoing mail for the morning summary. `MAIL_MAILER=log` writes emails to the log instead of sending them |
+| `MAIL_MAILER` | `log` (default locally: emails are written to `storage/logs/laravel.log`), `smtp` or `ses` |
+| `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Sender of the morning summary. Use an address on a domain your mail provider is set up to send from |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SCHEME` | SMTP server, when `MAIL_MAILER=smtp`. Mailgun (`smtp.mailgun.org`), Amazon SES, Brevo and most other providers offer SMTP credentials, so this needs no extra packages. Use port 587 |
+| `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION` | Amazon SES API, when `MAIL_MAILER=ses` (also run `composer require aws/aws-sdk-php`) |
 
 The Business Profile scope (`business.manage`) is a restricted Google scope: until Google approves your project, only test users you add in the Google Cloud console can sign in.
 
@@ -116,9 +121,17 @@ php artisan schedule:work      # or a cron entry: * * * * * php artisan schedule
 php artisan queue:work
 ```
 
-`reviews:sync` runs hourly. Each run queues only monitored locations where the local time is between 02:00 and 02:59 and that have not been synced that local day. A sync fetches reviews from the last 24 hours, or back to the start of the last synced day if nights were missed (at most 30 days), skips reviews already answered on Google, and queues one draft per new review. For a manual run: `php artisan reviews:sync --force` (all monitored locations) or `--location=ID`.
+`reviews:sync` and `summaries:send` both run hourly.
+
+`reviews:sync` Each run queues only monitored locations where the local time is between 02:00 and 02:59 and that have not been synced that local day. A sync fetches reviews from the last 24 hours, or back to the start of the last synced day if nights were missed (at most 30 days), skips reviews already answered on Google, and queues one draft per new review. For a manual run: `php artisan reviews:sync --force` (all monitored locations) or `--location=ID`.
 
 On hosts without cron, the `Review sync` GitHub Actions workflow (`.github/workflows/sync-cron.yml`) calls `POST /api/cron/run` hourly with `Authorization: Bearer $CRON_SECRET`, which runs `reviews:sync` and then works the queue until it is empty. Set the repository variable `API_URL` and secret `CRON_SECRET` to enable it.
+
+`summaries:send` emails each owner who has the daily summary switched on, when it is their chosen hour in their timezone, at most once per local day, and only if drafts were created since their last summary. Each email is sent from the queue and recorded in the API usage log. The cron endpoint runs it too, after `reviews:sync`.
+
+## Deploying the web app
+
+The expected production address, `https://review-responder.vercel.app`, is not verified yet. If the site is deployed elsewhere, replace it in `web/index.html` (canonical and social tags), `web/src/lib/site.js`, `web/public/robots.txt` and `web/public/sitemap.xml`. The social preview image `web/public/og-image.png` is referenced but not created yet; it will be a real screenshot of the app.
 
 ## Security
 

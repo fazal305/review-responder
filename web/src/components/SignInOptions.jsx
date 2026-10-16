@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { api, errorMessage } from '../lib/api'
 import { startGoogleSignIn, useAuth } from '../lib/auth'
 import { useResource } from '../hooks/useResource'
@@ -12,12 +12,19 @@ export function SignInOptions() {
   const config = useResource((signal) => api.get('/config', { signal }).then((r) => r.data))
   const [busy, setBusy] = useState(null)
   const [error, setError] = useState(null)
+  const [agreed, setAgreed] = useState(false)
+  const [agreeError, setAgreeError] = useState(null)
 
   async function tryDemo() {
+    if (!agreed) {
+      setAgreeError('Please confirm you are 18 or older and accept the Terms to try the demo.')
+      document.getElementById('demo-terms')?.focus()
+      return
+    }
     setBusy('demo')
     setError(null)
     try {
-      const res = await api.post('/auth/demo')
+      const res = await api.post('/auth/demo', { accept_terms: true })
       signIn(res.data.token, res.data.user)
       navigate('/app')
     } catch (err) {
@@ -68,6 +75,35 @@ export function SignInOptions() {
         <p id="google-off" className="text-xs text-muted">
           Google sign-in isn&apos;t set up on this server yet (it needs a Google Cloud OAuth client). The demo works without it.
         </p>
+      )}
+      {demoEnabled && (
+        <div>
+          <div className="flex items-start gap-2.5">
+            <input
+              id="demo-terms"
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => {
+                setAgreed(e.target.checked)
+                if (e.target.checked) setAgreeError(null)
+              }}
+              aria-invalid={agreeError ? true : undefined}
+              aria-describedby={agreeError ? 'demo-terms-error' : undefined}
+              className="mt-0.5 size-4 shrink-0 accent-brand"
+            />
+            <label htmlFor="demo-terms" className="text-sm">
+              I am 18 or older and accept the{' '}
+              <Link to="/terms" className="font-semibold text-brand underline underline-offset-2">
+                Terms of Service
+              </Link>
+            </label>
+          </div>
+          {agreeError && (
+            <p id="demo-terms-error" className="mt-1 text-xs font-semibold text-danger">
+              {agreeError}
+            </p>
+          )}
+        </div>
       )}
       {demoEnabled && (
         <Button variant="secondary" className="w-full min-h-11" onClick={tryDemo} busy={busy === 'demo'}>

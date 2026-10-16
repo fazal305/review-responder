@@ -23,15 +23,21 @@ class AuthController extends Controller
         ]);
     }
 
-    public function demo(ReviewSync $sync): JsonResponse
+    public function demo(Request $request, ReviewSync $sync): JsonResponse
     {
         abort_unless(config('services.demo.login_enabled'), 404, 'The demo is not available.');
+
+        $request->validate(
+            ['accept_terms' => ['accepted']],
+            ['accept_terms.accepted' => 'Please confirm you are 18 or older and accept the Terms of Service.'],
+        );
 
         $user = User::create([
             'name' => 'Demo owner',
             'email' => 'demo-'.Str::uuid().'@demo.invalid',
             'is_demo' => true,
         ]);
+        $user->forceFill(['terms_accepted_at' => now()])->save();
         $sync->seedDemo($user);
 
         return response()->json([
@@ -68,6 +74,22 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         return response()->json(['user' => $request->user()->toProfile()]);
+    }
+
+    /** Records the first-sign-in confirmation: 18 or older, authorized for the business profile, and the Terms accepted. */
+    public function acceptTerms(Request $request): JsonResponse
+    {
+        $request->validate(
+            ['accept_terms' => ['accepted']],
+            ['accept_terms.accepted' => 'Please tick the box to confirm.'],
+        );
+
+        $user = $request->user();
+        if (! $user->hasAcceptedTerms()) {
+            $user->forceFill(['terms_accepted_at' => now()])->save();
+        }
+
+        return response()->json(['user' => $user->toProfile()]);
     }
 
     public function logout(Request $request): JsonResponse

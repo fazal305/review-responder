@@ -33,8 +33,27 @@ export default function PublicLayout() {
         <Outlet />
       </main>
       <footer className="border-t border-line">
-        <div className="mx-auto max-w-5xl px-4 py-6 text-sm text-muted sm:px-6">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-6 text-sm text-muted sm:px-6">
           <p>© 2026 Fazal Abbas</p>
+          <nav aria-label="Legal">
+            <ul className="flex flex-wrap gap-x-5 gap-y-2">
+              <li>
+                <Link to="/privacy" className="hover:text-ink hover:underline">
+                  Privacy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="hover:text-ink hover:underline">
+                  Terms
+                </Link>
+              </li>
+              <li>
+                <Link to="/faq" className="hover:text-ink hover:underline">
+                  FAQ
+                </Link>
+              </li>
+            </ul>
+          </nav>
         </div>
       </footer>
     </div>

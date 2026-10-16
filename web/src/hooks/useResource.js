@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { errorMessage } from '../lib/api'
+import { SITE_URL } from '../lib/site'
 
 const SLOW_AFTER_MS = 4000
 
@@ -61,6 +62,7 @@ export function useOnline() {
 
 export function useDocumentTitle(title) {
   useEffect(() => {
-    document.title = title ? `${title} · Review Responder` : 'Review Responder'
+    document.title = title ? `${title} · Review Responder` : 'Review Responder — reply drafts for your Google reviews'
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', SITE_URL + window.location.pathname)
   }, [title])
 }

@@ -20,6 +20,7 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     // Role is deliberately not fillable; promotion happens only via the user:promote command.
+    // terms_accepted_at and last_summary_sent_on are also set only by the app, never from request input.
     protected $attributes = ['role' => 'owner', 'is_demo' => false, 'timezone' => 'UTC', 'notify_daily' => true, 'notify_hour' => 7];
 
     protected function casts(): array
@@ -29,6 +30,8 @@ class User extends Authenticatable
             'is_demo' => 'boolean',
             'notify_daily' => 'boolean',
             'notify_hour' => 'integer',
+            'last_summary_sent_on' => 'date',
+            'terms_accepted_at' => 'datetime',
         ];
     }
 
@@ -57,6 +60,11 @@ class User extends Authenticatable
         return $this->role === UserRole::Admin;
     }
 
+    public function hasAcceptedTerms(): bool
+    {
+        return $this->terms_accepted_at !== null;
+    }
+
     public function toProfile(): array
     {
         return [
@@ -68,6 +76,7 @@ class User extends Authenticatable
             'notify_daily' => $this->notify_daily,
             'notify_hour' => $this->notify_hour,
             'google_connected' => $this->googleAccount()->exists(),
+            'terms_accepted' => $this->hasAcceptedTerms(),
         ];
     }
 }

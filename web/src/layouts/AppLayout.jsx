@@ -1,4 +1,5 @@
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router'
+import { AcceptTerms } from '../components/AcceptTerms'
 import { LogoMark, Wordmark } from '../components/Logo'
 import { OfflineBanner } from '../components/OfflineBanner'
 import { Button, ErrorState, Skeleton } from '../components/ui'
@@ -21,7 +22,7 @@ function NavIcon({ d }) {
 }
 
 export function RequireAuth({ children }) {
-  const { status, retry, expired } = useAuth()
+  const { status, retry, expired, user } = useAuth()
   const location = useLocation()
 
   if (status === 'checking') {
@@ -44,6 +45,7 @@ export function RequireAuth({ children }) {
   if (status !== 'authed') {
     return <Navigate to="/signin" replace state={{ from: location.pathname, expired }} />
   }
+  if (!user.is_demo && !user.terms_accepted) return <AcceptTerms />
   return children
 }
 

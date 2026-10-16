@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
   const retry = useCallback(() => setStatus('checking'), [])
 
   const value = useMemo(
-    () => ({ user, status, expired, signIn, signOut, forget, retry }),
+    () => ({ user, status, expired, signIn, signOut, forget, retry, setUser }),
     [user, status, expired, signIn, signOut, forget, retry],
   )
 

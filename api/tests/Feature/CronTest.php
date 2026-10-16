@@ -29,7 +29,8 @@ class CronTest extends TestCase
 
         $this->postJson('/api/cron/run', [], ['Authorization' => 'Bearer right-secret'])
             ->assertOk()
-            ->assertJsonPath('sync', 'Queued 1 location sync(s).');
+            ->assertJsonPath('sync', 'Queued 1 location sync(s).')
+            ->assertJsonPath('summaries', 'Queued 0 summary email(s).');
 
         $this->assertSame('2026-10-16', $location->fresh()->last_synced_on->toDateString());
     }

@@ -12,6 +12,9 @@ import NotFound from './pages/public/NotFound'
 const Landing = lazy(() => import('./pages/public/Landing'))
 const SignIn = lazy(() => import('./pages/public/SignIn'))
 const AuthCallback = lazy(() => import('./pages/public/AuthCallback'))
+const Privacy = lazy(() => import('./pages/public/Privacy'))
+const Terms = lazy(() => import('./pages/public/Terms'))
+const Faq = lazy(() => import('./pages/public/Faq'))
 const Queue = lazy(() => import('./pages/app/Queue'))
 const Locations = lazy(() => import('./pages/app/Locations'))
 const Settings = lazy(() => import('./pages/app/Settings'))
@@ -51,6 +54,9 @@ const router = createBrowserRouter([
           { path: '/', element: <Page><Landing /></Page> },
           { path: '/signin', element: <Page><SignIn /></Page> },
           { path: '/auth/callback', element: <Page><AuthCallback /></Page> },
+          { path: '/privacy', element: <Page><Privacy /></Page> },
+          { path: '/terms', element: <Page><Terms /></Page> },
+          { path: '/faq', element: <Page><Faq /></Page> },
           { path: '*', element: <NotFound /> },
         ],
       },

@@ -20,14 +20,14 @@ class AuthTest extends TestCase
 
     public function test_demo_login_creates_an_isolated_demo_owner(): void
     {
-        $first = $this->postJson('/api/auth/demo')
+        $first = $this->postJson('/api/auth/demo', ['accept_terms' => true])
             ->assertCreated()
             ->assertJsonPath('user.is_demo', true)
             ->assertJsonPath('user.role', 'owner')
             ->assertJsonPath('user.timezone', 'UTC')
             ->assertJsonMissingPath('user.id');
 
-        $this->postJson('/api/auth/demo')->assertCreated();
+        $this->postJson('/api/auth/demo', ['accept_terms' => true])->assertCreated();
 
         $this->assertSame(2, User::where('is_demo', true)->count());
         $this->withToken($first->json('token'))->getJson('/api/me')
@@ -38,17 +38,17 @@ class AuthTest extends TestCase
     {
         config(['services.demo.login_enabled' => false]);
 
-        $this->postJson('/api/auth/demo')->assertNotFound();
+        $this->postJson('/api/auth/demo', ['accept_terms' => true])->assertNotFound();
         $this->assertSame(0, User::count());
     }
 
     public function test_demo_login_is_rate_limited_per_ip(): void
     {
         for ($i = 0; $i < 3; $i++) {
-            $this->postJson('/api/auth/demo')->assertCreated();
+            $this->postJson('/api/auth/demo', ['accept_terms' => true])->assertCreated();
         }
 
-        $this->postJson('/api/auth/demo')
+        $this->postJson('/api/auth/demo', ['accept_terms' => true])
             ->assertStatus(429)
             ->assertJsonStructure(['message'])
             ->assertHeader('Retry-After');

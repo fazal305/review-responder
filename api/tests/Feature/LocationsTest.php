@@ -36,7 +36,7 @@ class LocationsTest extends TestCase
 
     public function test_demo_login_seeds_sample_locations_reviews_and_drafts(): void
     {
-        $token = $this->postJson('/api/auth/demo')->assertCreated()->json('token');
+        $token = $this->postJson('/api/auth/demo', ['accept_terms' => true])->assertCreated()->json('token');
 
         $user = User::where('is_demo', true)->sole();
         $this->assertSame(3, $user->locations()->where('monitoring', true)->count());

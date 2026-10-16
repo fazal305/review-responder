@@ -16,11 +16,17 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'timezone' => 'UTC',
+            'terms_accepted_at' => now(),
         ];
     }
 
     public function admin(): static
     {
         return $this->afterMaking(fn (User $user) => $user->forceFill(['role' => 'admin']));
+    }
+
+    public function withoutTerms(): static
+    {
+        return $this->state(['terms_accepted_at' => null]);
     }
 }
