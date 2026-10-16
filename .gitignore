@@ -1,0 +1,5 @@
+.env
+.dev-credentials
+*.log
+.DS_Store
+Thumbs.db
