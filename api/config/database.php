@@ -61,6 +61,8 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                // Report matched rather than changed rows, as PostgreSQL and SQLite do, so a guarded update that rewrites identical values still counts.
+                Mysql::ATTR_FOUND_ROWS => true,
             ]) : [],
         ],
 
@@ -81,6 +83,8 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                // Report matched rather than changed rows, as PostgreSQL and SQLite do, so a guarded update that rewrites identical values still counts.
+                Mysql::ATTR_FOUND_ROWS => true,
             ]) : [],
         ],
 
