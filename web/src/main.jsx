@@ -8,6 +8,8 @@ import PublicLayout from './layouts/PublicLayout'
 import AppLayout, { RequireAdmin, RequireAuth } from './layouts/AppLayout'
 import { Skeleton } from './components/ui'
 import NotFound from './pages/public/NotFound'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 const Landing = lazy(() => import('./pages/public/Landing'))
 const SignIn = lazy(() => import('./pages/public/SignIn'))
@@ -82,5 +84,7 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <RouterProvider router={router} />
+    <Analytics />
+    <SpeedInsights />
   </StrictMode>,
 )
